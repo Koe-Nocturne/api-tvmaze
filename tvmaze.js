@@ -18,17 +18,32 @@
       }
  */
 async function searchShows(query) {
+  let querySelected = await axios.get(`http://api.tvmaze.com/search/shows?q=${query}`);
+  let shows = [];
+
+
+  for (let index = 0; index < querySelected.data.length; index++) {
+    function imageTester() {
+      if (querySelected.data[index].show.image === null) {
+        return "https://via.placeholder.com/210x295.png?text=No+Image+For+Show";
+      }
+      else { return querySelected.data[index].show.image.medium; }
+    };
+
+
+    shows.push({
+      id: querySelected.data[index].show.id,
+      name: querySelected.data[index].show.name,
+      summary: `<p>${querySelected.data[index].show.summary}</p>`,
+      image: imageTester()
+    });
+
+
+
+  }
   // TODO: Make an ajax request to the searchShows api.  Remove
   // hard coded data.
-
-  return [
-    {
-      id: 1767,
-      name: "The Bletchley Circle",
-      summary: "<p><b>The Bletchley Circle</b> follows the journey of four ordinary women with extraordinary skills that helped to end World War II.</p><p>Set in 1952, Susan, Millie, Lucy and Jean have returned to their normal lives, modestly setting aside the part they played in producing crucial intelligence, which helped the Allies to victory and shortened the war. When Susan discovers a hidden code behind an unsolved murder she is met by skepticism from the police. She quickly realises she can only begin to crack the murders and bring the culprit to justice with her former friends.</p>",
-      image: "http://static.tvmaze.com/uploads/images/medium_portrait/147/369403.jpg"
-    }
-  ]
+  return shows;
 }
 
 
@@ -47,6 +62,7 @@ function populateShows(shows) {
          <div class="card" data-show-id="${show.id}">
            <div class="card-body">
              <h5 class="card-title">${show.name}</h5>
+             <img style="float: left; margin-right: 10px;" src="${show.image}"/>
              <p class="card-text">${show.summary}</p>
            </div>
          </div>
@@ -63,7 +79,7 @@ function populateShows(shows) {
  *    - get list of matching shows and show in shows list
  */
 
-$("#search-form").on("submit", async function handleSearch (evt) {
+$("#search-form").on("submit", async function handleSearch(evt) {
   evt.preventDefault();
 
   let query = $("#search-query").val();
@@ -82,6 +98,7 @@ $("#search-form").on("submit", async function handleSearch (evt) {
  */
 
 async function getEpisodes(id) {
+  let episodeObj = await axios.get(`http://api.tvmaze.com/shows/<show id>/episodes`)
   // TODO: get episodes from tvmaze
   //       you can get this by making GET request to
   //       http://api.tvmaze.com/shows/SHOW-ID-HERE/episodes
